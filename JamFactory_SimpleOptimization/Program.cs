@@ -12,6 +12,7 @@ namespace JamFactory_SimpleOptimization
         {
             TestAlgorithm tester = new TestAlgorithm();
 
+            tester.SeedWithData();
             tester.RunTest();
 
             Console.ReadLine();
@@ -29,7 +30,6 @@ namespace JamFactory_SimpleOptimization
             rawMaterials = new List<RawMaterial>();
             deliveries = new List<Delivery>();
             recipes = new List<Recipe>();
-
         }
 
         public void SeedWithData()
@@ -39,10 +39,10 @@ namespace JamFactory_SimpleOptimization
             rawMaterials.Add(new RawMaterial("Solbær"));
             rawMaterials.Add(new RawMaterial("Sukker"));
 
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[0], Amount = 500, Price = 10 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[1], Amount = 500, Price = 5 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[2], Amount = 500, Price = 8 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[3], Amount = 1000, Price = 7 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[0], Amount = 300, Price = 10 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[1], Amount = 600, Price = 5 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[2], Amount = 100, Price = 8 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[3], Amount = 100000, Price = 7 });
 
             Recipe recipe1 = new Recipe("Solbær marmelade");
             recipe1.Ingredients.Add(new Ingredient {RawMaterial = rawMaterials[2], Amount = 0.45});
@@ -72,12 +72,55 @@ namespace JamFactory_SimpleOptimization
             // to handle multiple deliveries for one raw material: need productions, 
             // of which there can be many candidate productions per recipe
 
-            // calculate the amount to produce of each recipe
+            // calculate the amount to produce of each recipe 
+
+            // or instead, calculate amount of each raw material in every production
+            // then use that to calculate how many productions can be made
+
+            Console.WriteLine("-----------------");
+            Console.WriteLine("Amount that can be produced:");
             foreach (Recipe recipe in recipes)
             {
-
+                double possibleAmount = calculateAmountThatCanBeProduced(recipe, deliveries);
+                Console.WriteLine(recipe.Name + ": " + possibleAmount);
             }
+        }
 
+        private double calculateAmountThatCanBeProduced(Recipe recipe, List<Delivery> deliveries)
+        {
+            double amountOfJamThatCanBeMade = 0;
+
+            List<Delivery> matchingDeliveries = new List<Delivery>();
+            List<Tuple<Ingredient, double>> ingredientAmounts = new List<Tuple<Ingredient, double>>();
+
+            foreach (Ingredient ingredient in recipe.Ingredients)
+            {
+                matchingDeliveries.Add(getDeliveriesForRawMaterial(ingredient.RawMaterial)[0]);
+                double amountOfRawMaterialThatCanBeUsedToMakeJam = ingredient.Amount * getDeliveriesForRawMaterial(ingredient.RawMaterial)[0].Amount;
+                ingredientAmounts.Add(new Tuple<Ingredient, double>(ingredient, amountOfRawMaterialThatCanBeUsedToMakeJam));
+            }
+            
+            double amountOfLimitingIngredientToUse = ingredientAmounts[0].Item2;
+            Ingredient limitingIngredient = ingredientAmounts[0].Item1;
+
+            foreach (var ingredientAmount in ingredientAmounts)
+            {
+                if (ingredientAmount.Item2 < amountOfLimitingIngredientToUse)
+                {
+                    amountOfLimitingIngredientToUse = ingredientAmount.Item2;
+                    limitingIngredient = ingredientAmount.Item1;
+                }
+            }
+            
+            // I got the limitingIngredient, use that to calc it first
+
+            // calculate amount of jam that can be made
+
+            amountOfJamThatCanBeMade = ((1 - limitingIngredient.Amount) / limitingIngredient.Amount) * 
+                getDeliveriesForRawMaterial(limitingIngredient.RawMaterial)[0].Amount + amountOfLimitingIngredientToUse;
+
+
+            return amountOfJamThatCanBeMade;
         }
 
         private List<Recipe> orderRecipesByPrice()
