@@ -32,16 +32,16 @@ namespace JamFactory_SimpleOptimization
 
         }
 
-        public void RunTest()
+        public void SeedWithData()
         {
             rawMaterials.Add(new RawMaterial("Hyben"));
             rawMaterials.Add(new RawMaterial("Æble"));
             rawMaterials.Add(new RawMaterial("Solbær"));
             rawMaterials.Add(new RawMaterial("Sukker"));
 
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[0], Amount = 100, Price = 10 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[1], Amount = 100, Price = 5 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[2], Amount = 100, Price = 8 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[0], Amount = 500, Price = 10 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[1], Amount = 500, Price = 5 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[2], Amount = 500, Price = 8 });
             deliveries.Add(new Delivery { RawMaterial = rawMaterials[3], Amount = 1000, Price = 7 });
 
             Recipe recipe1 = new Recipe("Solbær marmelade");
@@ -54,17 +54,30 @@ namespace JamFactory_SimpleOptimization
             recipe2.Ingredients.Add(new Ingredient {RawMaterial = rawMaterials[1], Amount = 0.225});
             recipe2.Ingredients.Add(new Ingredient {RawMaterial = rawMaterials[3], Amount = 0.45});
             recipes.Add(recipe2);
+        }
 
+        public void RunTest()
+        {
             List<Recipe> cheapestRecipes = orderRecipesByPrice();
+
+            Console.WriteLine("-----------------");
+            Console.WriteLine("Cheapest recipes first:");
+
 
             foreach (Recipe recipe in cheapestRecipes)
             {
                 Console.WriteLine(recipe.Name);
             }
 
-            // calculate the amount to produce of each recipe
             // to handle multiple deliveries for one raw material: need productions, 
             // of which there can be many candidate productions per recipe
+
+            // calculate the amount to produce of each recipe
+            foreach (Recipe recipe in recipes)
+            {
+
+            }
+
         }
 
         private List<Recipe> orderRecipesByPrice()
