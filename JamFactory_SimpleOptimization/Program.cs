@@ -12,6 +12,7 @@ namespace JamFactory_SimpleOptimization
         {
             TestAlgorithm tester = new TestAlgorithm();
 
+            tester.SeedWithData();
             tester.RunTest();
 
             Console.ReadLine();
@@ -42,7 +43,7 @@ namespace JamFactory_SimpleOptimization
             deliveries.Add(new Delivery { RawMaterial = rawMaterials[0], Amount = 500, Price = 10 });
             deliveries.Add(new Delivery { RawMaterial = rawMaterials[1], Amount = 500, Price = 5 });
             deliveries.Add(new Delivery { RawMaterial = rawMaterials[2], Amount = 500, Price = 8 });
-            deliveries.Add(new Delivery { RawMaterial = rawMaterials[3], Amount = 1000, Price = 7 });
+            deliveries.Add(new Delivery { RawMaterial = rawMaterials[3], Amount = 100000, Price = 7 });
 
             Recipe recipe1 = new Recipe("Solbær marmelade");
             recipe1.Ingredients.Add(new Ingredient {RawMaterial = rawMaterials[2], Amount = 0.45});
@@ -73,11 +74,47 @@ namespace JamFactory_SimpleOptimization
             // of which there can be many candidate productions per recipe
 
             // calculate the amount to produce of each recipe
+
+            Console.WriteLine("-----------------");
+            Console.WriteLine("Amount that can be produced:");
             foreach (Recipe recipe in recipes)
             {
-
+                double possibleAmount = calculateAmountThatCanBeProduced(recipe, deliveries);
+                Console.WriteLine(recipe.Name + ": " + possibleAmount);
             }
 
+        }
+
+        private double calculateAmountThatCanBeProduced(Recipe recipe, List<Delivery> deliveries)
+        {
+            double amount = 0;
+
+            List<Delivery> matchingDeliveries = new List<Delivery>();
+            List<Tuple<Ingredient, double>> ingredientAmounts = new List<Tuple<Ingredient, double>>();
+
+            foreach (Ingredient ingredient in recipe.Ingredients)
+            {
+                matchingDeliveries.Add(getDeliveriesForRawMaterial(ingredient.RawMaterial)[0]);
+                double amountOfMarmeladeToMakeFromRawMaterial = ingredient.Amount * getDeliveriesForRawMaterial(ingredient.RawMaterial)[0].Amount;
+                ingredientAmounts.Add(new Tuple<Ingredient, double>(ingredient, amountOfMarmeladeToMakeFromRawMaterial));
+            }
+            
+            double min = ingredientAmounts[0].Item2;
+
+            foreach (var ingredientAmount in ingredientAmounts)
+            {
+                if (ingredientAmount.Item2 < min)
+                {
+                    min = ingredientAmount.Item2;
+                }
+            }
+
+            // calculate how much can be produced per ingredient
+            // find limiting raw material
+
+            amount = min;
+
+            return amount;
         }
 
         private List<Recipe> orderRecipesByPrice()
